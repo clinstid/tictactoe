@@ -226,6 +226,7 @@ function track_mouse(event)
 
 function mouse_click(event) 
 {
+    console.log("mouse_click() called");
     click_count += 1;
 
     var x = event.x - canvas.offsetLeft;
