@@ -175,20 +175,24 @@ function draw_line(start_x, start_y, end_x, end_y)
 
 function draw_x(square) 
 {
-        context.strokeStyle = "#000000";
-        context.lineWidth = 3;
+    console.log("draw_x: %d, %d to %d, %d", 
+                square.start_x, square.start_y,
+                square.end_x, square.end_Y);
 
-        context.beginPath();
-        context.moveTo(square.start_x, square.start_y);
-        context.lineTo(square.end_x, square.end_y);
-        context.closePath();
-        context.stroke();
+    context.strokeStyle = "#000000";
+    context.lineWidth = 3;
 
-        context.beginPath();
-        context.moveTo(square.start_x, square.end_y);
-        context.lineTo(square.end_x, square.start_y);
-        context.closePath();
-        context.stroke();
+    context.beginPath();
+    context.moveTo(square.start_x, square.start_y);
+    context.lineTo(square.end_x, square.end_y);
+    context.closePath();
+    context.stroke();
+
+    context.beginPath();
+    context.moveTo(square.start_x, square.end_y);
+    context.lineTo(square.end_x, square.start_y);
+    context.closePath();
+    context.stroke();
 }
 
 function draw_o(start_x, start_y, end_x, end_y) 
