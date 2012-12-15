@@ -137,7 +137,7 @@ function draw_board(name)
                   squares[2].end_x, squares[2].end_y);
 
         // bottom horizontal line
-        draw_line(squares[6].start_x, squares[6].end_y,
+        draw_line(squares[6].start_x, squares[6].start_y,
                   squares[5].end_x, squares[5].end_y);
 
         spacing = 5;
