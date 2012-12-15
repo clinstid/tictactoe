@@ -232,8 +232,7 @@ function mouse_click(event)
     var click_x = event.x - canvas.offsetLeft;
     var click_y = event.y - canvas.offsetTop;
 
-    total_x = x * y;
-    square_number = click_x * click_y / 3;
+    square_number = click_x * click_y / (x * y * 3);
     console.log("Predicated square_number is %d", square_number);
 
     for (var i = 0; i < 9; i++)
