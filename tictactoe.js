@@ -112,33 +112,33 @@ function draw_board(name)
         x = canvas.width;
         y = canvas.height - message_height;
 
-        square[0] = new Square(0, 0, x/3, y/3);
-        square[1] = new Square(x/3, 0, 2*x/3, y/3);
-        square[2] = new Square(2*x/3, 0, x, y/3);
+        squares[0] = new Square(0, 0, x/3, y/3);
+        squares[1] = new Square(x/3, 0, 2*x/3, y/3);
+        squares[2] = new Square(2*x/3, 0, x, y/3);
 
-        square[3] = new Square(0, y/3, x/3, 2*y/3);
-        square[4] = new Square(x/3, y/3, 2*x/3, 2*y/3);
-        square[5] = new Square(2*x/3, y/3, x, 2*y/3);
+        squares[3] = new Square(0, y/3, x/3, 2*y/3);
+        squares[4] = new Square(x/3, y/3, 2*x/3, 2*y/3);
+        squares[5] = new Square(2*x/3, y/3, x, 2*y/3);
 
-        square[6] = new Square(0, 2*y/3, x/3, y);
-        square[7] = new Square(x/3, 2*y/3, 2*x/3, y);
-        square[8] = new Square(2*x/3, 2*y/3, x, y);
+        squares[6] = new Square(0, 2*y/3, x/3, y);
+        squares[7] = new Square(x/3, 2*y/3, 2*x/3, y);
+        squares[8] = new Square(2*x/3, 2*y/3, x, y);
 
         // left vertical line
-        draw_line(square[1].start_x, square[1].start_y,
-                  square[6].end_x, square[6].end_y);
+        draw_line(squares[1].start_x, squares[1].start_y,
+                  squares[6].end_x, squares[6].end_y);
 
         // right vertical line
-        draw_line(square[2].start_x, square[2].start_y,
-                  square[7].end_x, square[7].end_y);
+        draw_line(squares[2].start_x, squares[2].start_y,
+                  squares[7].end_x, squares[7].end_y);
 
         // top horizontal line
-        draw_line(square[3].start_x, square[3].start_y,
-                  square[2].end_x, square[2].end_y);
+        draw_line(squares[3].start_x, squares[3].start_y,
+                  squares[2].end_x, squares[2].end_y);
 
         // bottom horizontal line
-        draw_line(square[6].start_x, square[6].end_y,
-                  square[5].end_x, square[5].end_y);
+        draw_line(squares[6].start_x, squares[6].end_y,
+                  squares[5].end_x, squares[5].end_y);
 
         spacing = 5;
 
