@@ -18,6 +18,7 @@ var context;
 var message_x = 5;
 var message_y = 480;
 var message_height = 50;
+var message_font_size = 12;
 
 // The width to use for the lines on the board
 var board_line_width = 2;
@@ -82,7 +83,7 @@ function draw_board(name)
 {
     canvas = document.getElementById(name);
 
-    message_y = canvas.height;
+    message_y = canvas.height - message_font_size;
 
     // Check the element is in the DOM and the browser supports canvas
     if(canvas.getContext) 
