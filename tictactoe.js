@@ -173,20 +173,20 @@ function draw_line(start_x, start_y, end_x, end_y)
         context.stroke();
 }
 
-function draw_x(start_x, start_y, end_x, end_y) 
+function draw_x(square) 
 {
         context.strokeStyle = "#000000";
         context.lineWidth = 3;
 
         context.beginPath();
-        context.moveTo(start_x, start_y);
-        context.lineTo(end_x, end_y);
+        context.moveTo(square.start_x, square.start_y);
+        context.lineTo(square.end_x, square.end_y);
         context.closePath();
         context.stroke();
 
         context.beginPath();
-        context.moveTo(start_x, end_y);
-        context.lineTo(end_x, start_y);
+        context.moveTo(square.start_x, square.end_y);
+        context.lineTo(square.end_x, square.start_y);
         context.closePath();
         context.stroke();
 }
@@ -232,9 +232,6 @@ function mouse_click(event)
     var click_x = event.x - canvas.offsetLeft;
     var click_y = event.y - canvas.offsetTop;
 
-    square_number = click_x * click_y / (x * y * 3);
-    console.log("Predicated square_number is %d", square_number);
-
     for (var i = 0; i < 9; i++)
     {
         if (squares[i].within(click_x, click_y, board_line_width))
@@ -250,6 +247,7 @@ function mouse_click(event)
                     click_x,
                     click_y,
                     click_count);
+        draw_x(square[i]);
     }
     else
     {
@@ -258,6 +256,5 @@ function mouse_click(event)
                     click_y,
                     click_count);
     }
-
 }
 
