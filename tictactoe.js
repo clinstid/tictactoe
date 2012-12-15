@@ -112,6 +112,8 @@ function draw_board(name)
         x = canvas.width;
         y = canvas.height - message_height;
 
+        console.log("message_height %d", message_height);
+
         squares[0] = new Square(0, 0, x/3, y/3);
         squares[1] = new Square(x/3, 0, 2*x/3, y/3);
         squares[2] = new Square(2*x/3, 0, x, y/3);
