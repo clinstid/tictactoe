@@ -82,7 +82,7 @@ function draw_board(name)
 {
     canvas = document.getElementById(name);
 
-    message_y = canvas.height - message_height + 5;
+    message_y = canvas.height;
 
     // Check the element is in the DOM and the browser supports canvas
     if(canvas.getContext) 
