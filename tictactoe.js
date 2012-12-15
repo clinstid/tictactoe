@@ -17,7 +17,7 @@ var context;
 // updated once we get our canvas's dimensions.
 var message_x = 5;
 var message_y = 480;
-var message_height = 30;
+var message_height = 50;
 
 // The width to use for the lines on the board
 var board_line_width = 2;
