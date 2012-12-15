@@ -67,8 +67,12 @@ function Square(start_x, start_y, end_x, end_y)
 
 Square.prototype.within = function(x, y, border_width)
 {
-    if (x > (this.start_x + border_width) && x < (this.end_x - border_width) &&
-        y > (this.start_y + border_width) && y < (this.end_y - border_width))
+    console.log("Testing if click is within square: %d [ %d ] %d, %d [ %d ] %d",
+                this.start_x, x, this.end_x, this.start_y, y, this.end_y);
+    if (x > (this.start_x + border_width) && 
+        x < (this.end_x - border_width) &&
+        y > (this.start_y + border_width) && 
+        y < (this.end_y - border_width))
     {
         return true;
     }
