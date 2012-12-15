@@ -238,21 +238,22 @@ function mouse_click(event)
         {
             break;
         }
-        if (i < 9)
-        {
-            console.log("Mouse click is in square %d: %d,%d #%d",
-                        i,
-                        x,
-                        y,
-                        click_count);
-        }
-        else
-        {
-            console.log("Mouse click is not inside square: %d,%d #%d",
-                        x,
-                        y,
-                        click_count);
-        }
+    }
+
+    if (i < 9)
+    {
+        console.log("Mouse click is in square %d: %d,%d #%d",
+                    i,
+                    x,
+                    y,
+                    click_count);
+    }
+    else
+    {
+        console.log("Mouse click is not inside square: %d,%d #%d",
+                    x,
+                    y,
+                    click_count);
     }
 }
 
