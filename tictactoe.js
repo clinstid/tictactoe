@@ -251,7 +251,7 @@ function mouse_click(event)
                     click_x,
                     click_y,
                     click_count);
-        draw_x(square[i]);
+        draw_x(squares[i]);
     }
     else
     {
