@@ -113,8 +113,6 @@ function draw_board(name)
         x = canvas.width;
         y = canvas.height - message_height;
 
-        console.log("message_height %d", message_height);
-
         squares[0] = new Square(0, 0, x/3, y/3);
         squares[1] = new Square(x/3, 0, 2*x/3, y/3);
         squares[2] = new Square(2*x/3, 0, x, y/3);
@@ -225,9 +223,30 @@ function track_mouse(event)
 function mouse_click(event) 
 {
     click_count += 1;
-    console.log("Mouse click: %d,%d #%d",
-                event.x - canvas.offsetLeft,
-                event.y - canvas.offsetTop,
-                click_count);
+
+    var x = event.x - canvas.offsetLeft;
+    var y = event.y - canvas.offsetTop;
+
+    for (var i = 0; i < 9; i++)
+    {
+        if (squares[i].within(x, y, board_line_width))
+        {
+            break;
+        }
+        if (i < 9)
+        {
+            console.log("Mouse click is in square %d: %d,%d #%d",
+                        i,
+                        x,
+                        y,
+                        click_count);
+        }
+        else
+        {
+            console.log("Mouse click is not inside square: %d,%d #%d",
+                        x,
+                        y,
+                        click_count);
+        }
 }
 
