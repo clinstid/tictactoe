@@ -248,5 +248,6 @@ function mouse_click(event)
                         y,
                         click_count);
         }
+    }
 }
 
