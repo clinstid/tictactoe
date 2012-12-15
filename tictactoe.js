@@ -67,8 +67,8 @@ function Square(start_x, start_y, end_x, end_y)
 
 Square.prototype.within = function(x, y, border_width)
 {
-    console.log("Testing if click is within square: %d [ %d ] %d, %d [ %d ] %d",
-                this.start_x, x, this.end_x, this.start_y, y, this.end_y);
+    // console.log("Testing if click is within square: %d [ %d ] %d, %d [ %d ] %d",
+    //             this.start_x, x, this.end_x, this.start_y, y, this.end_y);
     if (x > (this.start_x + border_width) && 
         x < (this.end_x - border_width) &&
         y > (this.start_y + border_width) && 
@@ -229,12 +229,16 @@ function mouse_click(event)
     console.log("mouse_click() called");
     click_count += 1;
 
-    var x = event.x - canvas.offsetLeft;
-    var y = event.y - canvas.offsetTop;
+    var click_x = event.x - canvas.offsetLeft;
+    var click_y = event.y - canvas.offsetTop;
+
+    total_x = x * y;
+    square_number = click_x * click_y / 3;
+    console.log("Predicated square_number is %d", square_number);
 
     for (var i = 0; i < 9; i++)
     {
-        if (squares[i].within(x, y, board_line_width))
+        if (squares[i].within(click_x, click_y, board_line_width))
         {
             break;
         }
@@ -244,16 +248,17 @@ function mouse_click(event)
     {
         console.log("Mouse click is in square %d: %d,%d #%d",
                     i,
-                    x,
-                    y,
+                    click_x,
+                    click_y,
                     click_count);
     }
     else
     {
         console.log("Mouse click is not inside square: %d,%d #%d",
-                    x,
-                    y,
+                    click_x,
+                    click_y,
                     click_count);
     }
+
 }
 
