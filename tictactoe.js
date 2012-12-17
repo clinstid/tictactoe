@@ -23,29 +23,11 @@ var message_font_size = 12;
 // The width to use for the lines on the board
 var board_line_width = 2;
 
-var vert_left_start_x = 0;
-var vert_left_start_y = 0;
+// The width to use for drawing the X and O
+var piece_line_width = 3;
 
-var vert_left_end_x = 0;
-var vert_left_end_y = 0;
-
-var vert_right_start_x = 0;
-var vert_right_start_y = 0;
-
-var vert_right_end_x = 0;
-var vert_right_end_y = 0;
-
-var horiz_top_start_x = 0;
-var horiz_top_start_y = 0;
-
-var horiz_top_end_x = 0;
-var horiz_top_end_y = 0;
-
-var horiz_bottom_start_x = 0;
-var horiz_bottom_start_y = 0;
-
-var horiz_bottom_end_x = 0;
-var horiz_bottom_end_y = 0;
+// The space to leave between X/O and the border of the board
+var square_spacing = 3;
 
 var click_count = 0;
 
@@ -57,10 +39,10 @@ function Square(start_x, start_y, end_x, end_y)
     var SQUARE_X = 1;
     var SQUARE_O = 2;
 
-    this.start_x = start_x;
-    this.start_y = start_y;
-    this.end_x = end_x;
-    this.end_y = end_y;
+    this.start_x = parseInt(start_x);
+    this.start_y = parseInt(start_y);
+    this.end_x = parseInt(end_x);
+    this.end_y = parseInt(end_y);
     this.contains = SQUARE_EMPTY;
 
 }
@@ -145,18 +127,6 @@ function draw_board(name)
         draw_line(squares[6].start_x, squares[6].start_y,
                   squares[5].end_x, squares[5].end_y);
 
-        spacing = 5;
-
-        // draw_x(spacing,
-        //        spacing,
-        //        vert_left_start_x - spacing,
-        //        horiz_top_start_y - spacing);
-
-        // draw_o(spacing,
-        //        spacing,
-        //        vert_left_start_x - spacing,
-        //        horiz_top_start_y - spacing);
-
         write_message("Would you like to play a game?");
     }
 }
@@ -177,20 +147,24 @@ function draw_x(square)
 {
     console.log("draw_x: %d, %d to %d, %d", 
                 square.start_x, square.start_y,
-                square.end_x, square.end_Y);
+                square.end_x, square.end_y);
 
     context.strokeStyle = "#000000";
-    context.lineWidth = 3;
+    context.lineWidth = piece_line_width;
 
     context.beginPath();
-    context.moveTo(square.start_x, square.start_y);
-    context.lineTo(square.end_x, square.end_y);
+    context.moveTo(square.start_x + square_spacing, 
+                   square.start_y + square_spacing);
+    context.lineTo(square.end_x - square_spacing, 
+                   square.end_y - square_spacing);
     context.closePath();
     context.stroke();
 
     context.beginPath();
-    context.moveTo(square.start_x, square.end_y);
-    context.lineTo(square.end_x, square.start_y);
+    context.moveTo(square.start_x + square_spacing, 
+                   square.end_y - square_spacing);
+    context.lineTo(square.end_x - square_spacing, 
+                   square.start_y + square_spacing);
     context.closePath();
     context.stroke();
 }
@@ -198,12 +172,12 @@ function draw_x(square)
 function draw_o(start_x, start_y, end_x, end_y) 
 {
         context.strokeStyle = "#000000";
-        context.lineWidth = 3;
+        context.lineWidth = piece_line_width;
 
         context.beginPath();
         context.arc(start_x + end_x / 2, 
                     start_y + end_y / 2,
-                    (end_x - start_x) / 2 - spacing,
+                    (end_x - start_x) / 2 - piece_line_width,
                     0,
                     Math.PI * 2,
                     false);
@@ -236,38 +210,16 @@ function mouse_click(event)
     var click_x = event.x - canvas.offsetLeft;
     var click_y = event.y - canvas.offsetTop;
 
-    console.time("calculate square");
+    // Calculate which square we're in.
     var row = parseInt(click_x / (x / 3));
     var column = parseInt(click_y / (y / 3));
     var square_number = row + (column * 3);
-    console.log("Predicted square number is %d", square_number);
-    console.timeEnd("calculate square");
+    console.log("calculated square number is %d", square_number);
 
-    console.time("iterate for square");
-    for (var i = 0; i < 9; i++)
+    // Make sure that the click wasn't on a border.
+    if (squares[square_number].within(click_x, click_y, board_line_width))
     {
-        if (squares[i].within(click_x, click_y, board_line_width))
-        {
-            break;
-        }
-    }
-    console.timeEnd("iterate for square");
-
-    if (i < 9)
-    {
-        console.log("Mouse click is in square %d: %d,%d #%d",
-                    i,
-                    click_x,
-                    click_y,
-                    click_count);
-        draw_x(squares[i]);
-    }
-    else
-    {
-        console.log("Mouse click is not inside square: %d,%d #%d",
-                    click_x,
-                    click_y,
-                    click_count);
+        draw_x(squares[square_number]);
     }
 }
 
