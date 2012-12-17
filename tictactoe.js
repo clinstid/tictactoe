@@ -236,6 +236,14 @@ function mouse_click(event)
     var click_x = event.x - canvas.offsetLeft;
     var click_y = event.y - canvas.offsetTop;
 
+    console.time("calculate square");
+    var row = parseInt(click_x / (x / 3));
+    var column = parseInt(click_y / (y / 3));
+    var square_number = row + (column * 3);
+    console.log("Predicted square number is %d", square_number);
+    console.timeEnd("calculate square");
+
+    console.time("iterate for square");
     for (var i = 0; i < 9; i++)
     {
         if (squares[i].within(click_x, click_y, board_line_width))
@@ -243,6 +251,7 @@ function mouse_click(event)
             break;
         }
     }
+    console.timeEnd("iterate for square");
 
     if (i < 9)
     {
