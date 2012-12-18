@@ -72,7 +72,7 @@ Square.get_square_number = function(mouse_x, mouse_y)
 Square.prototype.highlight = function()
 {
     this.highlighted = true;
-    context.fillStyle("lightgray");
+    context.fillStyle = "lightgray";
     context.fillRect(this.start_x + border_width,
                      this.start_y + border_width, 
                      this.end_x - border_width,
