@@ -13,6 +13,12 @@
 var canvas;
 var context;
 
+// The coordinates of the board
+var board_start_x = 0;
+var board_start_y = 0;
+var board_end_x = 0;
+var board_end_y = 0;
+
 // Our message box's location. The y coordinate for the box is going to be
 // updated once we get our canvas's dimensions.
 var message_x = 5;
@@ -21,7 +27,7 @@ var message_height = 50;
 var message_font_size = 12;
 
 // The width to use for the lines on the board
-var board_line_width = 2;
+var board_line_width = 3;
 
 // The width to use for drawing the X and O
 var piece_line_width = 3;
@@ -31,16 +37,11 @@ var square_spacing = 3;
 
 var click_count = 0;
 
-var squares = new Array();
 
-var last_square_number = Square.NO_SQUARE;
+var squares = new Array();
 
 function Square(start_x, start_y, end_x, end_y)
 {
-    var SQUARE_EMPTY = 0;
-    var SQUARE_X = 1;
-    var SQUARE_O = 2;
-    var NO_SQUARE = -1;
 
     this.start_x = parseInt(start_x);
     this.start_y = parseInt(start_y);
@@ -50,11 +51,26 @@ function Square(start_x, start_y, end_x, end_y)
     this.highlighted = false;
 }
 
+Square.NO_SQUARE = -1;
+Square.SQUARE_EMPTY = 0;
+Square.SQUARE_X = 1;
+Square.SQUARE_O = 2;
+
+// Game state
+var last_square_number = Square.NO_SQUARE;
+var last_square_played = Square.SQUARE_EMPTY;
+
 Square.get_square_number = function(mouse_x, mouse_y)
 {
+    if (mouse_x < board_start_x || mouse_x > board_end_x ||
+        mouse_y < board_start_y || mouse_y > board_end_y)
+    {
+        return Square.NO_SQUARE;
+    }
+
     // Calculate which square we're in.
-    var row = parseInt(mouse_x / (x / 3));
-    var column = parseInt(mouse_y / (y / 3));
+    var row = parseInt(mouse_x / ((board_end_x - board_start_x) / 3));
+    var column = parseInt(mouse_y / ((board_end_y - board_start_y) / 3));
     var square_number = row + (column * 3);
     console.log("calculated square number is %d", square_number);
 
@@ -65,36 +81,40 @@ Square.get_square_number = function(mouse_x, mouse_y)
     }
     else
     {
-        return -1;
+        return Square.NO_SQUARE;
     }
 }
 
 Square.prototype.highlight = function()
 {
+    context.lineWdith = 0;
     this.highlighted = true;
-    context.fillStyle = "lightgray";
-    context.fillRect(this.start_x + border_width,
-                     this.start_y + border_width, 
-                     this.end_x - border_width,
-                     this.end_y - border_width);
+    context.fillStyle = "lightblue";
+    context.fillRect(this.start_x + board_line_width,
+                     this.start_y + board_line_width, 
+                     this.end_x - this.start_x - 2*board_line_width,
+                     this.end_y - this.start_y - 2*board_line_width);
 }
 
 Square.prototype.clear = function()
 {
+    context.lineWdith = 0;
     this.highlighted = false;
-    context.clearRect(this.start_x + border_width,
-                      this.start_y + border_width, 
-                      this.end_x - border_width,
-                      this.end_y - border_width);
+    context.clearRect(this.start_x + board_line_width,
+                      this.start_y + board_line_width, 
+                      this.end_x - this.start_x - 2*board_line_width,
+                      this.end_y - this.start_y - 2*board_line_width);
 }
 
 Square.prototype.draw_x = function() 
 {
     console.log("draw_x: %d, %d to %d, %d", 
-                square.start_x, square.start_y,
-                square.end_x, square.end_y);
+                this.start_x, this.start_y,
+                this.end_x, this.end_y);
 
-    context.strokeStyle = "#000000";
+    this.clear();
+
+    context.strokeStyle = "black";
     context.lineWidth = piece_line_width;
 
     context.beginPath();
@@ -112,31 +132,43 @@ Square.prototype.draw_x = function()
                    this.start_y + square_spacing);
     context.closePath();
     context.stroke();
+
+    this.contains = Square.SQUARE_X;
 }
 
 Square.prototype.draw_o = function () 
 {
-        context.strokeStyle = "#000000";
-        context.lineWidth = piece_line_width;
+    context.strokeStyle = "black";
+    context.lineWidth = piece_line_width;
 
-        context.beginPath();
-        context.arc(this.start_x + this.end_x / 2, 
-                    this.start_y + this.end_y / 2,
-                    (this.end_x - this.start_x) / 2 - this.piece_line_width,
-                    0,
-                    Math.PI * 2,
-                    false);
-        context.closePath();
-        context.stroke();
+    this.clear();
+
+    context.beginPath();
+    console.log("Drawing O - x:%d, y:%d, radius:%d, startAngle:%f, endAngle:%f",
+                (this.start_x + this.end_x) / 2, 
+                (this.start_y + this.end_y) / 2,
+                (this.end_x - this.start_x) / 2 - piece_line_width,
+                0,
+                Math.PI * 2);
+    context.arc((this.start_x + this.end_x) / 2, 
+                (this.start_y + this.end_y) / 2,
+                (this.end_x - this.start_x) / 2 - piece_line_width,
+                0,
+                Math.PI * 2,
+                false);
+    context.closePath();
+    context.stroke();
+
+    this.contains = Square.SQUARE_O;
 }
-Square.prototype.within = function(x, y, border_width)
+Square.prototype.within = function(x, y)
 {
     // console.log("Testing if click is within square: %d [ %d ] %d, %d [ %d ] %d",
     //             this.start_x, x, this.end_x, this.start_y, y, this.end_y);
-    if (x > (this.start_x + border_width) && 
-        x < (this.end_x - border_width) &&
-        y > (this.start_y + border_width) && 
-        y < (this.end_y - border_width))
+    if (x > (this.start_x + board_line_width) && 
+        x < (this.end_x - board_line_width) &&
+        y > (this.start_y + board_line_width) && 
+        y < (this.end_y - board_line_width))
     {
         return true;
     }
@@ -189,20 +221,22 @@ function draw_board(name)
         // 0,y    x/3,y 2x/3,y x,y
         //
 
-        x = canvas.width;
-        y = canvas.height - message_height;
+        board_start_x = 0;
+        board_start_y = 0;
+        board_end_x = canvas.width;
+        board_end_y = canvas.height - message_height;
 
-        squares[0] = new Square(0, 0, x/3, y/3);
-        squares[1] = new Square(x/3, 0, 2*x/3, y/3);
-        squares[2] = new Square(2*x/3, 0, x, y/3);
+        squares[0] = new Square(board_start_x, board_start_y, board_end_x/3, board_end_y/3);
+        squares[1] = new Square(board_end_x/3, board_start_y, 2*board_end_x/3, board_end_y/3);
+        squares[2] = new Square(2*board_end_x/3, board_start_y, board_end_x, board_end_y/3);
 
-        squares[3] = new Square(0, y/3, x/3, 2*y/3);
-        squares[4] = new Square(x/3, y/3, 2*x/3, 2*y/3);
-        squares[5] = new Square(2*x/3, y/3, x, 2*y/3);
+        squares[3] = new Square(board_start_x, board_end_y/3, board_end_x/3, 2*board_end_y/3);
+        squares[4] = new Square(board_end_x/3, board_end_y/3, 2*board_end_x/3, 2*board_end_y/3);
+        squares[5] = new Square(2*board_end_x/3, board_end_y/3, board_end_x, 2*board_end_y/3);
 
-        squares[6] = new Square(0, 2*y/3, x/3, y);
-        squares[7] = new Square(x/3, 2*y/3, 2*x/3, y);
-        squares[8] = new Square(2*x/3, 2*y/3, x, y);
+        squares[6] = new Square(board_start_x, 2*board_end_y/3, board_end_x/3, board_end_y);
+        squares[7] = new Square(board_end_x/3, 2*board_end_y/3, 2*board_end_x/3, board_end_y);
+        squares[8] = new Square(2*board_end_x/3, 2*board_end_y/3, board_end_x, board_end_y);
 
         // left vertical line
         draw_line(squares[1].start_x, squares[1].start_y,
@@ -253,22 +287,29 @@ function track_mouse(event)
 
     var square_number = Square.get_square_number(mouse_x, mouse_y);
 
-    if (square_number != Square.NO_SQUARE)
+    if (square_number == last_square_number)
     {
-        var square = squares[square_number];
-        if (square.empty())
+        return;
+    }
+    else if (square_number != Square.NO_SQUARE)
+    {
+        //console.log("track_mouse: square_number is %d", square_number);
+        if (squares[square_number].empty())
         {
-            square.highlight();
+            squares[square_number].highlight();
         }
         
-        if (last_square_number != square_number && last_square_number != Square.NO_SQUARE)
+        if (last_square_number != Square.NO_SQUARE && 
+            squares[last_square_number].empty())
         {
+            console.log("Mouse exit from square %d, clearing", last_square_number);
             squares[last_square_number].clear();
         }
 
         last_square_number = square_number;
     }
-    else if (last_square_number != Square.NO_SQUARE)
+    else if (last_square_number != Square.NO_SQUARE &&
+             squares[last_square_number].empty())
     {
         squares[last_square_number].clear();
         last_square_number = Square.NO_SQUARE;
@@ -282,9 +323,6 @@ function track_mouse(event)
 
 function mouse_click(event) 
 {
-    console.log("mouse_click() called");
-    click_count += 1;
-
     var click_x = event.x - canvas.offsetLeft;
     var click_y = event.y - canvas.offsetTop;
 
@@ -294,5 +332,23 @@ function mouse_click(event)
     {
         play(square_number);
     }
+}
+
+function play(square_number)
+{
+    if (squares[square_number].empty())
+    {
+        if (last_square_played == Square.SQUARE_X)
+        {
+            squares[square_number].draw_o();
+            last_square_played = Square.SQUARE_O;
+        }
+        else
+        {
+            squares[square_number].draw_x();
+            last_square_played = Square.SQUARE_X;
+        }
+    }
+
 }
 
