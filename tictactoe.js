@@ -251,6 +251,8 @@ function track_mouse(event)
     var mouse_x = event.clientX - rect.left;
     var mouse_y = event.clientY - rect.top;
 
+    var square_number = Square.get_square_number(mouse_x, mouse_y);
+
     if (square_number != Square.NO_SQUARE)
     {
         var square = squares[square_number];
