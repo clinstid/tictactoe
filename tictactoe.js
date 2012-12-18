@@ -94,6 +94,7 @@ Square.get_square_number = function(mouse_x, mouse_y)
     }
 
     // Make sure that the mouse wasn't on a border.
+    console.log("square_number %d", square_number);
     if (squares[square_number].within(mouse_x, mouse_y, board_line_width))
     {
         return square_number;
