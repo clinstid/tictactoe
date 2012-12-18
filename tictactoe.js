@@ -39,7 +39,7 @@ var squares = new Array();
 
 var win_table = [ [ [1, 2], [3, 6], [4, 8] ],
                   [ [0, 2], [4, 7] ],
-                  [ [0, 1], [5, 8] ],
+                  [ [0, 1], [4, 6], [5, 8] ],
                   [ [0, 6], [4, 5] ],
                   [ [0, 8], [1, 7], [2, 6], [3, 5] ],
                   [ [2, 8], [3, 4] ],
@@ -82,9 +82,9 @@ Square.get_square_number = function(mouse_x, mouse_y)
     }
 
     // Calculate which square we're in.
-    var row = parseInt(mouse_x / ((board_end_x - board_start_x) / 3));
-    var column = parseInt(mouse_y / ((board_end_y - board_start_y) / 3));
-    var square_number = row + (column * 3);
+    var column = parseInt(mouse_x / ((board_end_x - board_start_x) / 3));
+    var row = parseInt(mouse_y / ((board_end_y - board_start_y) / 3));
+    var square_number = column + (row * 3);
     // console.log("calculated square number is %d", square_number);
 
     if (square_number < Square.MIN_SQUARE_NUMBER ||
@@ -94,7 +94,6 @@ Square.get_square_number = function(mouse_x, mouse_y)
     }
 
     // Make sure that the mouse wasn't on a border.
-    console.log("square_number %d", square_number);
     if (squares[square_number].within(mouse_x, mouse_y, board_line_width))
     {
         return square_number;
@@ -349,8 +348,8 @@ function track_mouse(event)
 
 function mouse_click(event) 
 {
-    var click_x = event.x - canvas.offsetLeft;
-    var click_y = event.y - canvas.offsetTop;
+    var click_x = event.clientX - canvas.offsetLeft;
+    var click_y = event.clientY - canvas.offsetTop;
 
     var square_number = Square.get_square_number(click_x, click_y);
 
