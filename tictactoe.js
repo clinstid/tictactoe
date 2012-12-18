@@ -46,7 +46,7 @@ function Square(start_x, start_y, end_x, end_y)
     this.start_y = parseInt(start_y);
     this.end_x = parseInt(end_x);
     this.end_y = parseInt(end_y);
-    this.contains = SQUARE_EMPTY;
+    this.contains = Square.SQUARE_EMPTY;
     this.highlighted = false;
 }
 
@@ -148,7 +148,7 @@ Square.prototype.within = function(x, y, border_width)
 
 Square.prototype.empty = function()
 {
-    if (this.contains == SQUARE_EMPTY)
+    if (this.contains == Square.SQUARE_EMPTY)
     {
         return true;
     }
