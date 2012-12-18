@@ -21,8 +21,8 @@ var board_end_y = 0;
 
 // Our message box's location. The y coordinate for the box is going to be
 // updated once we get our canvas's dimensions.
-var message_x = 5;
-var message_y = 480;
+var message_start_x = 5;
+var message_start_y = 480;
 var message_height = 50;
 var message_font_size = 12;
 
@@ -35,10 +35,17 @@ var piece_line_width = 3;
 // The space to leave between X/O and the border of the board
 var square_spacing = 3;
 
-var click_count = 0;
-
-
 var squares = new Array();
+
+var win_table = [ [ [1, 2], [3, 6], [4, 8] ],
+                  [ [0, 2], [4, 7] ],
+                  [ [0, 1], [5, 8] ],
+                  [ [0, 6], [4, 5] ],
+                  [ [0, 8], [1, 7], [2, 6], [3, 5] ],
+                  [ [2, 8], [3, 4] ],
+                  [ [0, 3], [2, 4], [7, 8] ],
+                  [ [1, 4], [6, 8] ],
+                  [ [0, 4], [2, 5], [6, 7] ] ];
 
 function Square(start_x, start_y, end_x, end_y)
 {
@@ -47,7 +54,7 @@ function Square(start_x, start_y, end_x, end_y)
     this.start_y = parseInt(start_y);
     this.end_x = parseInt(end_x);
     this.end_y = parseInt(end_y);
-    this.contains = Square.SQUARE_EMPTY;
+    this.value = Square.SQUARE_EMPTY;
     this.highlighted = false;
 }
 
@@ -55,10 +62,16 @@ Square.NO_SQUARE = -1;
 Square.SQUARE_EMPTY = 0;
 Square.SQUARE_X = 1;
 Square.SQUARE_O = 2;
+Square.MIN_SQUARE_NUMBER = 0;
+Square.MAX_SQUARE_NUMBER = 8;
+
+MAX_PLAY_COUNT = 9;
 
 // Game state
 var last_square_number = Square.NO_SQUARE;
 var last_square_played = Square.SQUARE_EMPTY;
+var game_over = false;
+var play_count = 0;
 
 Square.get_square_number = function(mouse_x, mouse_y)
 {
@@ -72,7 +85,13 @@ Square.get_square_number = function(mouse_x, mouse_y)
     var row = parseInt(mouse_x / ((board_end_x - board_start_x) / 3));
     var column = parseInt(mouse_y / ((board_end_y - board_start_y) / 3));
     var square_number = row + (column * 3);
-    console.log("calculated square number is %d", square_number);
+    // console.log("calculated square number is %d", square_number);
+
+    if (square_number < Square.MIN_SQUARE_NUMBER ||
+        square_number > Square.MAX_SQUARE_NUMBER)
+    {
+        return Square.NO_SQUARE;
+    }
 
     // Make sure that the mouse wasn't on a border.
     if (squares[square_number].within(mouse_x, mouse_y, board_line_width))
@@ -108,9 +127,9 @@ Square.prototype.clear = function()
 
 Square.prototype.draw_x = function() 
 {
-    console.log("draw_x: %d, %d to %d, %d", 
-                this.start_x, this.start_y,
-                this.end_x, this.end_y);
+    // console.log("draw_x: %d, %d to %d, %d", 
+    //             this.start_x, this.start_y,
+    //             this.end_x, this.end_y);
 
     this.clear();
 
@@ -133,7 +152,7 @@ Square.prototype.draw_x = function()
     context.closePath();
     context.stroke();
 
-    this.contains = Square.SQUARE_X;
+    this.value = Square.SQUARE_X;
 }
 
 Square.prototype.draw_o = function () 
@@ -144,12 +163,12 @@ Square.prototype.draw_o = function ()
     this.clear();
 
     context.beginPath();
-    console.log("Drawing O - x:%d, y:%d, radius:%d, startAngle:%f, endAngle:%f",
-                (this.start_x + this.end_x) / 2, 
-                (this.start_y + this.end_y) / 2,
-                (this.end_x - this.start_x) / 2 - piece_line_width,
-                0,
-                Math.PI * 2);
+    // console.log("Drawing O - x:%d, y:%d, radius:%d, startAngle:%f, endAngle:%f",
+    //             (this.start_x + this.end_x) / 2, 
+    //             (this.start_y + this.end_y) / 2,
+    //             (this.end_x - this.start_x) / 2 - piece_line_width,
+    //             0,
+    //             Math.PI * 2);
     context.arc((this.start_x + this.end_x) / 2, 
                 (this.start_y + this.end_y) / 2,
                 (this.end_x - this.start_x) / 2 - piece_line_width,
@@ -159,7 +178,7 @@ Square.prototype.draw_o = function ()
     context.closePath();
     context.stroke();
 
-    this.contains = Square.SQUARE_O;
+    this.value = Square.SQUARE_O;
 }
 Square.prototype.within = function(x, y)
 {
@@ -180,7 +199,7 @@ Square.prototype.within = function(x, y)
 
 Square.prototype.empty = function()
 {
-    if (this.contains == Square.SQUARE_EMPTY)
+    if (this.value == Square.SQUARE_EMPTY)
     {
         return true;
     }
@@ -194,7 +213,7 @@ function draw_board(name)
 {
     canvas = document.getElementById(name);
 
-    message_y = canvas.height - message_font_size;
+    message_start_y = canvas.height - message_height;
 
     // Check the element is in the DOM and the browser supports canvas
     if(canvas.getContext) 
@@ -273,10 +292,11 @@ function draw_line(start_x, start_y, end_x, end_y)
 
 function write_message(message) 
 {
-    context.clearRect(message_x, message_y, canvas.width, canvas.height);
-    context.font = "12pt Monospace";
+    context.clearRect(message_start_x, message_start_y, 
+                      canvas.width - message_start_x, canvas.height - message_start_y);
+    context.font = message_font_size + "pt Monospace";
     context.fillStyle = "black";
-    context.fillText(message, message_x, message_y);
+    context.fillText(message, message_start_x, canvas.height-5);
 }
 
 function track_mouse(event) 
@@ -286,6 +306,11 @@ function track_mouse(event)
     var mouse_y = event.clientY - rect.top;
 
     var square_number = Square.get_square_number(mouse_x, mouse_y);
+
+    if (game_over)
+    {
+        return;
+    }
 
     if (square_number == last_square_number)
     {
@@ -302,7 +327,7 @@ function track_mouse(event)
         if (last_square_number != Square.NO_SQUARE && 
             squares[last_square_number].empty())
         {
-            console.log("Mouse exit from square %d, clearing", last_square_number);
+            // console.log("Mouse exit from square %d, clearing", last_square_number);
             squares[last_square_number].clear();
         }
 
@@ -334,8 +359,51 @@ function mouse_click(event)
     }
 }
 
+function log_squares()
+{
+    console.log("-----------------");
+    console.log("Row 1: 0:%d 1:%d 2:%d", squares[0].value, squares[1].value, squares[2].value);
+    console.log("Row 2: 3:%d 4:%d 5:%d", squares[3].value, squares[4].value, squares[5].value);
+    console.log("Row 3: 6:%d 7:%d 8:%d", squares[6].value, squares[7].value, squares[8].value);
+    console.log("-----------------");
+}
+
+function check_for_winner(square_number)
+{
+    var my_win_table = win_table[square_number];
+
+    for (var i = 0; i < my_win_table.length; i++)
+    {
+        var winner = squares[square_number].value;
+        var pair = my_win_table[i];
+        for (var j = 0; j < pair.length; j++)
+        {
+            var neighbor_square = pair[j];
+            // log_squares();
+            // console.log("winner = %d, value(%d) = %d", winner, neighbor_square, squares[neighbor_square].value);
+            if (squares[neighbor_square].value != winner)
+            {
+                winner = Square.SQUARE_EMPTY;
+                break;
+            }
+        }
+
+        if (winner != Square.SQUARE_EMPTY)
+        {
+            break;
+        }
+    }
+
+    return winner;
+}
+
 function play(square_number)
 {
+    if (game_over)
+    {
+        return;
+    }
+
     if (squares[square_number].empty())
     {
         if (last_square_played == Square.SQUARE_X)
@@ -348,7 +416,33 @@ function play(square_number)
             squares[square_number].draw_x();
             last_square_played = Square.SQUARE_X;
         }
-    }
 
+        check_for_last_move(square_number);
+    }
 }
 
+function check_for_last_move(square_number)
+{
+    play_count += 1;
+
+    if (play_count >= MAX_PLAY_COUNT)
+    {
+        write_message("DRAW!");
+        game_over = true;
+        return;
+    }
+
+    var winner = check_for_winner(square_number);
+    // console.log("winner = %d", winner);
+
+    if (winner == Square.SQUARE_X)
+    {
+        write_message("X WINS!");
+        game_over = true;
+    }
+    else if (winner == Square.SQUARE_O)
+    {
+        write_message("O WINS!");
+        game_over = true;
+    }
+}
