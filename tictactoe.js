@@ -425,15 +425,15 @@ function check_for_last_move(square_number)
 {
     play_count += 1;
 
-    if (play_count >= MAX_PLAY_COUNT)
+    var winner = check_for_winner(square_number);
+    // console.log("winner = %d", winner);
+
+    if (winner == Square.SQUARE_EMPTY && play_count >= MAX_PLAY_COUNT)
     {
         write_message("DRAW!");
         game_over = true;
         return;
     }
-
-    var winner = check_for_winner(square_number);
-    // console.log("winner = %d", winner);
 
     if (winner == Square.SQUARE_X)
     {
