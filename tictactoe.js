@@ -528,16 +528,16 @@ function next_ai_move(last_player_move)
     }
     else
     {
-        // Defend against player moves first.
-        var move = find_two(Square.SQUARE_X);
+        // First check if the AI can win
+        move = find_two(Square.SQUARE_O);
 
         if (Square.valid_square_number(move))
         {
             return move;
         }
         
-        // Next check if the AI can win
-        move = find_two(Square.SQUARE_O);
+        // Defend against player moves next.
+        var move = find_two(Square.SQUARE_X);
 
         if (Square.valid_square_number(move))
         {
