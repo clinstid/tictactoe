@@ -529,19 +529,32 @@ function next_ai_move(last_player_move)
     else
     {
         // Defend against player moves first.
-        var move = ai_defense();
-        
-        // If no defensive moves were required, then go on the offensive.
-        if (!Square.valid_square_number(move))
-        {
-            move = ai_offense();
-        }
+        var move = find_two(Square.SQUARE_X);
 
-        console.log("ai: play(%d)", move);
+        if (Square.valid_square_number(move))
+        {
+            return move;
+        }
         
-        return move;
+        // Next check if the AI can win
+        move = find_two(Square.SQUARE_O);
+
+        if (Square.valid_square_number(move))
+        {
+            return move;
+        }
+        
+        // Finally, pick a square that is in a winning position with a previous
+        // move
+        move = find_one(Square.SQUARE_O);
+
+        if (Square.valid_square_number(move))
+        {
+            return move;
+        }
     }
 
+    // No moves? We shouldn't get here. :(
     return Square.NO_SQUARE;
 }
 
@@ -600,14 +613,6 @@ function find_one(value)
 
 function ai_defense()
 {
-    var move = find_two(Square.SQUARE_X);
-
-    // console.log("ai_defense: find_two = %d", move);
-
-    if (!Square.valid_square_number(move))
-    {
-        move = find_one(Square.SQUARE_X);
-    }
 
     // console.log("ai_defense: play(%d)", move);
 
@@ -616,7 +621,6 @@ function ai_defense()
 
 function ai_offense()
 {
-    var move = find_two(Square.SQUARE_O);
 
     if (!Square.valid_square_number(move))
     {
