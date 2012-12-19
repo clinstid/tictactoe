@@ -73,6 +73,19 @@ var last_square_played = Square.SQUARE_EMPTY;
 var game_over = false;
 var play_count = 0;
 
+Square.valid_square_number = function(square_number)
+{
+    if (square_number < Square.MIN_SQUARE_NUMBER ||
+        square_number > Square.MAX_SQUARE_NUMBER)
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
 Square.get_square_number = function(mouse_x, mouse_y)
 {
     if (mouse_x < board_start_x || mouse_x > board_end_x ||
@@ -87,8 +100,7 @@ Square.get_square_number = function(mouse_x, mouse_y)
     var square_number = column + (row * 3);
     // console.log("calculated square number is %d", square_number);
 
-    if (square_number < Square.MIN_SQUARE_NUMBER ||
-        square_number > Square.MAX_SQUARE_NUMBER)
+    if (!Square.valid_square_number(square_number))
     {
         return Square.NO_SQUARE;
     }
@@ -399,6 +411,11 @@ function check_for_winner(square_number)
 
 function play(square_number)
 {
+    if (!Square.valid_square_number(square_number))
+    {
+        return;
+    }
+
     if (game_over)
     {
         return;
@@ -445,4 +462,168 @@ function check_for_last_move(square_number)
         write_message("O WINS!");
         game_over = true;
     }
+
+    if (!game_over && last_square_played == Square.SQUARE_X)
+    {
+        play(next_ai_move(square_number));
+    }
+}
+
+function random_interval(low, high)
+{
+    return Math.floor(Math.random()*(high - low + 1) + low);
+}
+
+function next_ai_move(last_player_move)
+{
+    //  0 | 1 | 2
+    // -----------
+    //  3 | 4 | 5
+    // -----------
+    //  6 | 7 | 8
+
+    var TOP_LEFT_SQUARE = 0;
+    var TOP_MIDDLE_SQUARE = 1;
+    var TOP_RIGHT_SQUARE = 2;
+    var CENTER_LEFT_SQUARE = 3;
+    var CENTER_SQUARE = 4;
+    var CENTER_RIGHT_SQUARE = 5;
+    var BOTTOM_LEFT_SQUARE = 6;
+    var BOTTOM_CENTER_SQUARE = 7;
+    var BOTTOM_RIGHT_SQUARE = 8;
+
+    var CORNER_SQUARES = [0, 2, 6, 8];
+
+    var NON_CENTER_OR_CORNER_SQUARES = [1, 3, 5, 7];
+
+    console.log("ai: play_count = %d", play_count);
+
+    if (play_count == 1) 
+    {
+        // We have a specific strategy for the first AI move. Either try the
+        // center square or one of the corner squares if the center was taken
+        // on the first player move. After that, we'll proceed with an
+        // algorithm of sorts. 
+
+        if (squares[CENTER_SQUARE].empty())
+        {
+            return CENTER_SQUARE;
+        }
+
+        for (var i = 0; i < CORNER_SQUARES.length; i++)
+        {
+            if (squares[CORNER_SQUARES[i]].empty())
+            {
+                return CORNER_SQUARES[i];
+            }
+        }
+
+        for (var i = 0; i < NON_CENTER_OR_CORNER_SQUARES.length; i++)
+        {
+            if (squares[NON_CENTER_OR_CORNER_SQUARES[i]].empty())
+            {
+                return NON_CENTER_OR_CORNER_SQUARES[i];
+            }
+        }
+    }
+    else
+    {
+        // Defend against player moves first.
+        var move = ai_defense();
+        
+        // If no defensive moves were required, then go on the offensive.
+        if (!Square.valid_square_number(move))
+        {
+            move = ai_offense();
+        }
+
+        console.log("ai: play(%d)", move);
+        
+        return move;
+    }
+
+    return Square.NO_SQUARE;
+}
+
+function find_two(value)
+{
+    for (var i = 0; i < squares.length; i++)
+    {
+        if (squares[i].value == value)
+        {
+            // console.log("find_two: found %d at square %d", value, i);
+            for (var j = 0; j < win_table[i].length; j++)
+            {
+                var pair = win_table[i][j];
+                // console.log("find_two: checking %d - %d - %d",
+                //             i, pair[0], pair[1]);
+                for (var k = 0; k < 2; k++)
+                {
+                    // console.log("find_two: pair[%d] = %d, pair[%d] = %d",
+                    //             0, squares[pair[0]].value, 1, squares[pair[1]].value);
+                    if (squares[pair[k]].value == value &&
+                        squares[pair[(k+1) % 2]].empty())
+                    {
+                        return pair[(k+1) % 2];
+                    }
+                }
+            }
+        }
+    }
+
+    return Square.NO_SQUARE;
+}
+
+function find_one(value)
+{
+    for (var i = 0; i < squares.length; i++)
+    {
+        if (squares[i].value == value)
+        {
+            for (var j = 0; j < win_table[i].length; j++)
+            {
+                var pair = win_table[i][j];
+                for (var k = 0; k < 2; k++)
+                {
+                    // console.log("find_one: try %d", pair[k]);
+                    if (squares[pair[k]].empty())
+                    {
+                        return pair[k];
+                    }
+                }
+            }
+        }
+    }
+
+    return Square.NO_SQUARE;
+}
+
+function ai_defense()
+{
+    var move = find_two(Square.SQUARE_X);
+
+    // console.log("ai_defense: find_two = %d", move);
+
+    if (!Square.valid_square_number(move))
+    {
+        move = find_one(Square.SQUARE_X);
+    }
+
+    // console.log("ai_defense: play(%d)", move);
+
+    return move;
+}
+
+function ai_offense()
+{
+    var move = find_two(Square.SQUARE_O);
+
+    if (!Square.valid_square_number(move))
+    {
+        move = find_one(Square.SQUARE_O);
+    }
+
+    // console.log("ai_offense: play(%d)", move);
+
+    return move;
 }
